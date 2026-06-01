@@ -1,0 +1,143 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Extract NF API",
+        "description": "API para extração de dados de Notas Fiscais de Serviço via Google Gemini 1.5 Flash",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080"
+        }
+    ],
+    "paths": {
+        "/api/v1/notas-fiscais/extrair": {
+            "post": {
+                "tags": [
+                    "Notas Fiscais"
+                ],
+                "summary": "Extrai dados de uma Nota Fiscal em PDF",
+                "operationId": "c6044f0e6490db6c92f055519c87ef24",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "pdf"
+                                ],
+                                "properties": {
+                                    "pdf": {
+                                        "description": "Arquivo PDF da Nota Fiscal (máx. 10MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "provider": {
+                                        "description": "Provedor LLM (opcional, padrão: definido no .env)",
+                                        "type": "string",
+                                        "nullable": true,
+                                        "enum": [
+                                            "gemini",
+                                            "openai",
+                                            "mistral"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Dados extraídos com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "output": {
+                                            "properties": {
+                                                "tomador_cnpj": {
+                                                    "type": "string",
+                                                    "example": "12.345.678/0001-90"
+                                                },
+                                                "tomador_nome": {
+                                                    "type": "string",
+                                                    "example": "Hospital Exemplo S.A."
+                                                },
+                                                "prestador_cnpj": {
+                                                    "type": "string",
+                                                    "example": "98.765.432/0001-10"
+                                                },
+                                                "prestador_nome": {
+                                                    "type": "string",
+                                                    "example": "Dr. João Silva ME"
+                                                },
+                                                "prestador_endereco": {
+                                                    "type": "string",
+                                                    "example": "Rua das Flores, 123 - Aracaju/SE"
+                                                },
+                                                "numero_nota_fiscal": {
+                                                    "type": "string",
+                                                    "example": "000123"
+                                                },
+                                                "valor_total_nota_fiscal": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15000
+                                                },
+                                                "data_emissao": {
+                                                    "type": "string",
+                                                    "example": "28/05/2026"
+                                                },
+                                                "descricao": {
+                                                    "type": "string",
+                                                    "example": "Serviços médicos prestados..."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Arquivo inválido ou campos não extraídos"
+                    },
+                    "502": {
+                        "description": "Falha na comunicação com o serviço de LLM"
+                    },
+                    "504": {
+                        "description": "Timeout no serviço de LLM"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Informe o token JWT no formato: Bearer {token}"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Notas Fiscais",
+            "description": "Notas Fiscais"
+        }
+    ]
+}

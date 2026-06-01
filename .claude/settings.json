@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(printenv ANTHROPIC_API_KEY)",
+      "PowerShell([System.Environment]::GetEnvironmentVariable\\(\"ANTHROPIC_API_KEY\", \"User\"\\); [System.Environment]::GetEnvironmentVariable\\(\"ANTHROPIC_API_KEY\", \"Machine\"\\); $env:ANTHROPIC_API_KEY)",
+      "Read(//c/Users/raimundo.araujo/.claude/**)",
+      "PowerShell(php --version)",
+      "PowerShell(composer --version)",
+      "Read(//c//**)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\raimundo.araujo\\\\AppData\\\\Local\" -Directory | Where-Object { $_.Name -match \"php|laragon|xampp|herd\" } | Select-Object FullName; Get-ChildItem \"C:\\\\Program Files\" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"php|laragon|xampp|herd\" } | Select-Object FullName; Get-ChildItem \"C:\\\\Program Files \\(x86\\)\" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"php|laragon|xampp|herd\" } | Select-Object FullName)",
+      "PowerShell(Get-Command php -ErrorAction SilentlyContinue)",
+      "PowerShell($env:PATH -split \";\")",
+      "PowerShell(docker --version)",
+      "PowerShell(docker info --format \"Server Version: {{.ServerVersion}}\" 2>$null)",
+      "PowerShell(docker run --rm -v \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf:/app\" -w /app composer:latest create-project laravel/laravel laravel-tmp --prefer-dist --no-interaction 2>&1)",
+      "PowerShell(docker run --rm -v \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf:/app\" -w /app composer:latest require php-open-source-saver/jwt-auth darkaonline/l5-swagger --no-interaction 2>&1)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Http\\\\Controllers\\\\Api\\\\V1\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Http\\\\Requests\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Http\\\\Resources\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Services\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Exceptions\")",
+      "PowerShell(docker run --rm -v \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf:/var/www/html\" -w /var/www/html php:8.2-cli php artisan vendor:publish --provider=\"PHPOpenSourceSaver\\\\JWTAuth\\\\Providers\\\\LaravelServiceProvider\" --no-interaction 2>&1)",
+      "PowerShell(php artisan vendor:publish --provider=\"L5Swagger\\\\L5SwaggerServiceProvider\" --no-interaction 2>&1)",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\.env.example\" \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\.env\")",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\vendor\\\\php-open-source-saver\\\\jwt-auth\\\\config\\\\config.php\" \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\config\\\\jwt.php\")",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\raimundo.araujo\\\\Documents\\\\Projetos\\\\Estudo\\\\extract-nf\\\\app\\\\Contracts\")",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:openai.com)",
+      "WebFetch(domain:mistral.ai)",
+      "WebSearch"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\raimundo.araujo\\Documents\\Projetos\\Estudo\\extract-nf\\docker"
+    ]
+  }
+}
