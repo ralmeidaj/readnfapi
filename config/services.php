@@ -55,4 +55,17 @@ return [
         'provider' => env('LLM_PROVIDER', 'gemini'),
     ],
 
+    'browser' => [
+        'timeout' => env('BROWSER_RENDER_TIMEOUT', 60),
+        'render_delay_ms' => env('BROWSER_RENDER_DELAY_MS', 5000),
+    ],
+
+    'artifact' => [
+        'http_timeout' => env('ARTIFACT_HTTP_TIMEOUT', 30),
+        'min_pdf_bytes' => env('ARTIFACT_MIN_PDF_BYTES', 1500),
+        'min_image_bytes' => env('ARTIFACT_MIN_IMAGE_BYTES', 3000),
+        'min_image_side' => env('ARTIFACT_MIN_IMAGE_SIDE', 350),
+        'min_text_chars' => env('ARTIFACT_MIN_TEXT_CHARS', 500),
+    ],
+
 ];

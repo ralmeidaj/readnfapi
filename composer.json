@@ -12,7 +12,8 @@
         "laravel/tinker": "^3.0",
         "openai-php/client": "^0.19.2",
         "php-open-source-saver/jwt-auth": "^2.9",
-        "smalot/pdfparser": "^2.12"
+        "smalot/pdfparser": "^2.12",
+        "spatie/browsershot": "^5.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

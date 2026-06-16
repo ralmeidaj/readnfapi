@@ -22,11 +22,45 @@ class OpenAiService implements LlmServiceInterface
     {
         $text = $this->extractText($pdfContent);
 
-        // Se o texto extraído for muito curto, usar visão (imagem)
         if (strlen(trim($text)) < 50) {
-            return $this->extractFromImage($pdfContent, $prompt);
+            return $this->extractPdfPageAsImage($pdfContent, $prompt);
         }
 
+        return $this->extractFromText($text, $prompt);
+    }
+
+    public function extractFromImage(string $imageContent, string $mimeType, string $prompt): array
+    {
+        try {
+            $base64 = base64_encode($imageContent);
+
+            $client = OpenAI::client($this->apiKey);
+            $response = $client->chat()->create([
+                'model'    => $this->model,
+                'messages' => [
+                    [
+                        'role'    => 'user',
+                        'content' => [
+                            [
+                                'type'      => 'image_url',
+                                'image_url' => ['url' => "data:{$mimeType};base64,{$base64}"],
+                            ],
+                            ['type' => 'text', 'text' => $prompt],
+                        ],
+                    ],
+                ],
+                'response_format' => ['type' => 'json_object'],
+            ]);
+
+            return $this->parseResponse($response->choices[0]->message->content ?? null);
+        } catch (\Exception $e) {
+            \Log::error('OpenAI image error', ['message' => $e->getMessage()]);
+            throw new ExtratorException('Falha ao processar o documento. Tente novamente.', 502);
+        }
+    }
+
+    public function extractFromText(string $text, string $prompt): array
+    {
         try {
             $client = OpenAI::client($this->apiKey);
 
@@ -48,7 +82,7 @@ class OpenAiService implements LlmServiceInterface
         return $this->parseResponse($response->choices[0]->message->content ?? null);
     }
 
-    private function extractFromImage(string $pdfContent, string $prompt): array
+    private function extractPdfPageAsImage(string $pdfContent, string $prompt): array
     {
         $tmpPdf = tempnam(sys_get_temp_dir(), 'nf_') . '.pdf';
         $tmpImg = sys_get_temp_dir() . '/nf_page';

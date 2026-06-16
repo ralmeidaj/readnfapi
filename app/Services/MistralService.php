@@ -26,13 +26,45 @@ class MistralService implements LlmServiceInterface
         $text = $this->extractText($pdfContent);
 
         if (strlen(trim($text)) < 50) {
-            return $this->extractFromImage($pdfContent, $prompt);
+            return $this->extractPdfPageAsImage($pdfContent, $prompt);
         }
 
         return $this->extractFromText($text, $prompt);
     }
 
-    private function extractFromText(string $text, string $prompt): array
+    public function extractFromImage(string $imageContent, string $mimeType, string $prompt): array
+    {
+        $base64 = base64_encode($imageContent);
+
+        $response = Http::withToken($this->apiKey)
+            ->timeout(60)
+            ->post($this->baseUrl, [
+                'model'    => $this->visionModel,
+                'messages' => [[
+                    'role'    => 'user',
+                    'content' => [
+                        [
+                            'type'      => 'image_url',
+                            'image_url' => ['url' => "data:{$mimeType};base64,{$base64}"],
+                        ],
+                        ['type' => 'text', 'text' => $prompt],
+                    ],
+                ]],
+                'response_format' => ['type' => 'json_object'],
+            ]);
+
+        if (! $response->successful()) {
+            \Log::error('Mistral image error', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+            throw new ExtratorException('Falha ao processar o documento. Tente novamente.', 502);
+        }
+
+        return $this->parseResponse(data_get($response->json(), 'choices.0.message.content'));
+    }
+
+    public function extractFromText(string $text, string $prompt): array
     {
         $response = Http::withToken($this->apiKey)
             ->timeout(60)
@@ -56,7 +88,7 @@ class MistralService implements LlmServiceInterface
         return $this->parseResponse(data_get($response->json(), 'choices.0.message.content'));
     }
 
-    private function extractFromImage(string $pdfContent, string $prompt): array
+    private function extractPdfPageAsImage(string $pdfContent, string $prompt): array
     {
         $tmpPdf  = tempnam(sys_get_temp_dir(), 'nf_') . '.pdf';
         $tmpImg  = sys_get_temp_dir() . '/nf_page';

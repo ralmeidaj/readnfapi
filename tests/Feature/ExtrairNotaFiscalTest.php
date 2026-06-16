@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Contracts\LlmServiceInterface;
 use App\Exceptions\ExtratorException;
+use App\Services\NotaArtifact;
+use App\Services\NotaArtifactResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -113,6 +115,96 @@ class ExtrairNotaFiscalTest extends TestCase
             ->postJson('/api/v1/notas-fiscais/extrair', ['pdf' => $pdf])
             ->assertStatus(502)
             ->assertJsonPath('message', 'Falha ao processar o documento. Tente novamente.');
+    }
+
+    public function test_extrai_dados_de_nota_fiscal_por_url_com_texto_renderizado(): void
+    {
+        $url = 'https://nfse.salvador.ba.gov.br/site/contribuinte/nota/notaprint.aspx?nf=1084';
+        $texto = str_repeat('Nota Fiscal NFS-e Prestador Tomador Valor Emissao ', 20);
+
+        $this->mock(NotaArtifactResolver::class, function ($mock) use ($url, $texto) {
+            $mock->shouldReceive('resolve')
+                ->once()
+                ->with($url)
+                ->andReturn(new NotaArtifact(NotaArtifact::TEXT, $texto, $url, 'text/plain'));
+        });
+
+        $this->mock(LlmServiceInterface::class, function ($mock) use ($texto) {
+            $mock->shouldReceive('extractFromText')
+                ->once()
+                ->with($texto, \Mockery::type('string'))
+                ->andReturn($this->dadosMock);
+        });
+
+        $token = $this->getJwtToken();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/api/v1/notas-fiscais/extrair', ['url' => $url]);
+
+        $response->assertOk()
+            ->assertJsonPath('output.numero_nota_fiscal', '000123')
+            ->assertJsonPath('output.valor_total_nota_fiscal', 15000);
+    }
+
+    public function test_extrai_dados_de_nota_fiscal_por_url_com_pdf_renderizado_quando_texto_for_loading(): void
+    {
+        $url = 'https://nfse.salvador.ba.gov.br/site/contribuinte/nota/notaprint.aspx?nf=1084';
+        $pdf = '%PDF-1.4 conteudo renderizado da nota';
+
+        $this->mock(NotaArtifactResolver::class, function ($mock) use ($url, $pdf) {
+            $mock->shouldReceive('resolve')
+                ->once()
+                ->with($url)
+                ->andReturn(new NotaArtifact(NotaArtifact::PDF, $pdf, $url, 'application/pdf'));
+        });
+
+        $this->mock(LlmServiceInterface::class, function ($mock) use ($pdf) {
+            $mock->shouldReceive('extractFromPdf')
+                ->once()
+                ->with($pdf, \Mockery::type('string'))
+                ->andReturn($this->dadosMock);
+        });
+
+        $token = $this->getJwtToken();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/api/v1/notas-fiscais/extrair', ['url' => $url]);
+
+        $response->assertOk()
+            ->assertJsonPath('output.numero_nota_fiscal', '000123')
+            ->assertJsonPath('output.valor_total_nota_fiscal', 15000);
+    }
+
+    public function test_extrai_dados_de_nota_fiscal_por_url_com_imagem_direto_no_llm(): void
+    {
+        $url = 'https://nfse.exemplo.gov.br/nota/print';
+        $image = 'fake-image-content';
+
+        $this->mock(NotaArtifactResolver::class, function ($mock) use ($url, $image) {
+            $artifact = new NotaArtifact(NotaArtifact::IMAGE, $image, $url, 'image/png');
+
+            $mock->shouldReceive('resolve')
+                ->once()
+                ->with($url)
+                ->andReturn($artifact);
+            $mock->shouldNotReceive('imageToPdf');
+        });
+
+        $this->mock(LlmServiceInterface::class, function ($mock) use ($image) {
+            $mock->shouldReceive('extractFromImage')
+                ->once()
+                ->with($image, 'image/png', \Mockery::type('string'))
+                ->andReturn($this->dadosMock);
+        });
+
+        $token = $this->getJwtToken();
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/api/v1/notas-fiscais/extrair', ['url' => $url]);
+
+        $response->assertOk()
+            ->assertJsonPath('output.numero_nota_fiscal', '000123')
+            ->assertJsonPath('output.valor_total_nota_fiscal', 15000);
     }
 
     private function getJwtToken(): string
